@@ -1,6 +1,6 @@
 from typing import Literal
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -59,3 +59,10 @@ def listar_gastos() -> list[dict]:
 @app.get("/api/gastos/resumen")
 def resumen_gastos() -> dict:
     return servicios.obtener_resumen()
+
+
+@app.delete("/api/gastos/{gasto_id}", status_code=204)
+def eliminar_gasto(gasto_id: int) -> Response:
+    if not servicios.eliminar_gasto(gasto_id):
+        raise HTTPException(status_code=404, detail="No se encontró el gasto")
+    return Response(status_code=204)

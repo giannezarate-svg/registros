@@ -45,6 +45,8 @@
       .expenses-card { grid-column: 1 / -1; }
       .expense-description { min-width: 0; overflow-wrap: anywhere; }
       .expense-meta { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+      .delete-expense { flex: 0 0 auto; min-height: 32px; padding: 0 10px; background: #f5f7f3; color: #647269; font-size: 11px; }
+      .delete-expense:hover { background: #fbecea; color: #a63e36; }
       .empty { color: var(--muted); font-size: 13px; }
       @media (max-width: 680px) { .page { padding: 30px 0; } .layout { grid-template-columns: 1fr; } .expenses-card { grid-column: auto; } }
     </style>
@@ -94,12 +96,13 @@
 
         <section class="card expenses-card">
           <h2>Gastos registrados</h2>
-          <div class="expense-list" id="lista-gastos">
+          <div class="expense-list" id="lista-gastos" aria-live="polite">
             {% if gastos %}
               {% for gasto in gastos %}
               <div class="expense">
                 <span class="expense-description"><strong>{{ gasto.descripcion }}</strong><span class="expense-meta">{{ gasto.categoria|capitalize }} · #{{ gasto.id }}</span></span>
                 <strong>{{ gasto.valor }}</strong>
+                <button class="delete-expense" type="button" data-id="{{ gasto.id }}" aria-label="Eliminar gasto {{ gasto.id }}">Eliminar</button>
               </div>
               {% endfor %}
             {% else %}
@@ -112,6 +115,101 @@
     <script>
       const form = document.querySelector("#form-gasto");
       const message = document.querySelector("#mensaje");
+      const expenseList = document.querySelector("#lista-gastos");
+      const categoryList = document.querySelector("#por-categoria");
+      const numberFormat = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 2 });
+      const capitalize = (value) => value.charAt(0).toUpperCase() + value.slice(1);
+
+      async function getJson(url) {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("No se pudieron actualizar los gastos.");
+        }
+        return response.json();
+      }
+
+      function renderExpenses(expenses) {
+        expenseList.replaceChildren();
+        if (expenses.length === 0) {
+          const empty = document.createElement("p");
+          empty.className = "empty";
+          empty.textContent = "Todavía no hay gastos. Agrega el primero desde el formulario.";
+          expenseList.append(empty);
+          return;
+        }
+
+        for (const expense of expenses) {
+          const row = document.createElement("div");
+          row.className = "expense";
+
+          const description = document.createElement("span");
+          description.className = "expense-description";
+          const title = document.createElement("strong");
+          title.textContent = expense.descripcion;
+          const meta = document.createElement("span");
+          meta.className = "expense-meta";
+          meta.textContent = `${capitalize(expense.categoria)} · #${expense.id}`;
+          description.append(title, meta);
+
+          const amount = document.createElement("strong");
+          amount.textContent = numberFormat.format(expense.valor);
+
+          const button = document.createElement("button");
+          button.className = "delete-expense";
+          button.type = "button";
+          button.dataset.id = expense.id;
+          button.setAttribute("aria-label", `Eliminar gasto ${expense.id}`);
+          button.textContent = "Eliminar";
+
+          row.append(description, amount, button);
+          expenseList.append(row);
+        }
+      }
+
+      function renderSummary(summary) {
+        document.querySelector("#total").textContent = numberFormat.format(summary.total);
+        categoryList.replaceChildren();
+        for (const [category, value] of Object.entries(summary.por_categoria)) {
+          const row = document.createElement("div");
+          row.className = "category";
+          const label = document.createElement("span");
+          label.textContent = capitalize(category);
+          const amount = document.createElement("strong");
+          amount.textContent = numberFormat.format(value);
+          row.append(label, amount);
+          categoryList.append(row);
+        }
+      }
+
+      async function refreshExpenses() {
+        const [expenses, summary] = await Promise.all([
+          getJson("/api/gastos"),
+          getJson("/api/gastos/resumen"),
+        ]);
+        renderExpenses(expenses);
+        renderSummary(summary);
+      }
+
+      expenseList.addEventListener("click", async (event) => {
+        const button = event.target.closest(".delete-expense");
+        if (!button) return;
+
+        message.textContent = "";
+        button.disabled = true;
+        try {
+          const response = await fetch(`/api/gastos/${button.dataset.id}`, {
+            method: "DELETE",
+          });
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || "No se pudo eliminar el gasto.");
+          }
+          await refreshExpenses();
+        } catch (error) {
+          message.textContent = error.message || "No se pudo conectar con el servidor.";
+          button.disabled = false;
+        }
+      });
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();

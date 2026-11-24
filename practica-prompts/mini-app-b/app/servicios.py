@@ -31,6 +31,14 @@ def registrar_gasto(descripcion: str, valor: float, categoria: str) -> Gasto:
     return gasto.copy()
 
 
+def eliminar_gasto(gasto_id: int) -> bool:
+    for indice, gasto in enumerate(_gastos):
+        if gasto["id"] == gasto_id:
+            del _gastos[indice]
+            return True
+    return False
+
+
 def obtener_resumen() -> dict[str, int | float | dict[str, int | float]]:
     por_categoria: dict[str, int | float] = {categoria: 0 for categoria in CATEGORIAS}
     for gasto in _gastos:
