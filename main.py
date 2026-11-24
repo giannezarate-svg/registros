@@ -1,7 +1,16 @@
-﻿from fastapi import FastAPI
+﻿from typing import Literal
+
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
 
 app = FastAPI(title="Registro de gastos")
 gastos = []
+
+
+class GastoEntrada(BaseModel):
+    descripcion: str
+    monto: float = Field(gt=0)
+    categoria: Literal["comida", "transporte", "estudio", "otros"]
 
 
 @app.get("/")
@@ -15,8 +24,8 @@ def listar_gastos():
 
 
 @app.post("/api/gastos", status_code=201)
-def crear_gasto(gasto: dict):
-    nuevo = {"id": len(gastos) + 1, **gasto}
+def crear_gasto(gasto: GastoEntrada):
+    nuevo = {"id": len(gastos) + 1, **gasto.model_dump()}
     gastos.append(nuevo)
     return nuevo
 
