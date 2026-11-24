@@ -1,3 +1,4 @@
+import importlib
 import random
 
 import pytest
@@ -37,3 +38,11 @@ def test_delete_gasto_inexistente_devuelve_404(gasto_id):
     respuesta = cliente.delete(f"/api/gastos/{gasto_id}")
 
     assert respuesta.status_code == 404
+
+
+def test_logica_de_gastos_separada_en_modulo_servicios():
+    servicios = importlib.import_module("servicios")
+
+    assert callable(servicios.listar_gastos)
+    assert callable(servicios.registrar_gasto)
+    assert callable(servicios.eliminar_gasto)

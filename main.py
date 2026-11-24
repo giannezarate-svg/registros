@@ -3,8 +3,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+import servicios
+
 app = FastAPI(title="Registro de gastos")
-gastos = []
 
 
 class GastoEntrada(BaseModel):
@@ -20,20 +21,15 @@ def inicio():
 
 @app.get("/api/gastos")
 def listar_gastos():
-    return gastos
+    return servicios.listar_gastos()
 
 
 @app.post("/api/gastos", status_code=201)
 def crear_gasto(gasto: GastoEntrada):
-    nuevo = {"id": len(gastos) + 1, **gasto.model_dump()}
-    gastos.append(nuevo)
-    return nuevo
+    return servicios.registrar_gasto(gasto.model_dump())
 
 
 @app.delete("/api/gastos/{gasto_id}", status_code=204)
 def eliminar_gasto(gasto_id: int):
-    for g in gastos:
-        if g["id"] == gasto_id:
-            gastos.remove(g)
-            return
-    raise HTTPException(status_code=404, detail="No se encontró el gasto")
+    if not servicios.eliminar_gasto(gasto_id):
+        raise HTTPException(status_code=404, detail="No se encontró el gasto")
