@@ -1,6 +1,6 @@
 ﻿from typing import Literal
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 app = FastAPI(title="Registro de gastos")
@@ -36,3 +36,4 @@ def eliminar_gasto(gasto_id: int):
         if g["id"] == gasto_id:
             gastos.remove(g)
             return
+    raise HTTPException(status_code=404, detail="No se encontró el gasto")
