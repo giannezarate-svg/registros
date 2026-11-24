@@ -1,29 +1,40 @@
 # AGENTS.md
 
 ## Proyecto
-Mini-aplicación de práctica: Registro de gastos. Datos ficticios en memoria, sin base de datos.
+Aplicación web para registrar gastos ficticios y consultar su distribución.
+Permite crear y eliminar gastos, consultar el listado y ver totales por categoría.
 
 ## Stack
-Python 3.14, FastAPI y plantillas Jinja2
-pytest con TestClient, Ruff
+Python 3.14, FastAPI, Pydantic, Jinja2, HTML/CSS/JavaScript nativo, pytest, httpx y Ruff. Los datos se guardan en memoria; no hay base de datos.
 
 ## Comandos
-Instalar: `pip install -r requirements.txt`
-Ejecutar: `uvicorn app.main:app --reload`
-Pruebas: `python -m pytest -v`
-Estilo: `ruff check .`
+- Instalar: `pip install -r requirements.txt`
+- Ejecutar: `uvicorn app.main:app --reload`
+- Pruebas: `python -m pytest -v`
+- Estilo: `ruff check .`
 
 ## Estructura
-`app/main.py`: crea la aplicación y define las rutas
-`app/servicios.py`: lógica y datos en memoria, sin FastAPI
-`app/templates/index.html`: página principal con HTML, CSS y JavaScript
-`tests/test_aceptacion.py`: contrato de la API; no se modifica
+- `app/`: paquete de la aplicación.
+- `app/__init__.py`: inicialización del paquete.
+- `app/main.py`: modelos de entrada y salida, aplicación FastAPI y rutas.
+- `app/servicios.py`: categorías, almacenamiento en memoria y lógica de gastos/resumen.
+- `app/templates/`: plantillas HTML.
+- `app/templates/index.html`: interfaz, estilos y JavaScript del registro de gastos.
+- `tests/`: pruebas automatizadas de API y funcionalidades.
+- `tests/test_aceptacion.py`: pruebas de aceptación del contrato principal.
+- `tests/test_mejora.py`: pruebas de eliminación y actualización del resumen.
+- `requirements.txt`: dependencias de la aplicación y herramientas.
+- `pyproject.toml`: configuración de Ruff.
+- `.gitignore`: archivos y directorios ignorados por Git.
+- `prompt-b.md`: especificación inicial de la aplicación.
+- `prompt-mejora.md`: especificación de la mejora de eliminación.
+- `AGENTS.md`: contexto, comandos y reglas para contribuir al proyecto.
 
 ## Qué no hacer
-No modificar ni borrar tests/test_aceptacion.py.
-No instalar dependencias que no estén en requirements.txt.
-No usar base de datos ni archivos para guardar datos.
-No hacer commit ni push.
+- No modificar las pruebas para que pasen.
+- No escribir claves en el código.
+- No instalar dependencias sin explicar para qué.
+- No usar base de datos ni archivos para persistir gastos.
+- No hacer commit ni push.
 
 ## Lecciones aprendidas
-Cada vez que el agente se equivoque, se escribe aquí la regla que evita repetir el error.

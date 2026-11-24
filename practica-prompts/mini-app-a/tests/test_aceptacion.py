@@ -1,6 +1,6 @@
 import pytest
-from fastapi.testclient import TestClient
 from app.main import app
+from fastapi.testclient import TestClient
 
 cliente = TestClient(app)
 CATEGORIAS = {"comida", "transporte", "estudio", "otros"}

@@ -1,15 +1,15 @@
+import sqlite3
+from collections.abc import Iterator
 from contextlib import asynccontextmanager, contextmanager
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
-import sqlite3
-from typing import Iterator, Literal
+from typing import Literal
 
 from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
-
 
 BASE_DIR = Path(__file__).resolve().parent
 DATABASE_PATH = BASE_DIR / "expenses.db"
