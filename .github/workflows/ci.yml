@@ -1,0 +1,22 @@
+﻿name: CI
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'semana-*' ]
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Instalar dependencias
+        run: |
+          pip install fastapi httpx pytest ruff
+      - name: Ruff check
+        run: ruff check .
+      - name: Pytest
+        run: python -m pytest tests -v
